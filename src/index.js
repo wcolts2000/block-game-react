@@ -76,16 +76,46 @@ const Button = styled.button`
   }
 `;
 
+const Timer = styled.p``;
+
 class App extends Component {
-  state = {
-    nums: [1, 2, 3, 4, 5, 6, 7, 8, ""]
-  };
+  constructor() {
+    super();
+    this.state = {
+      nums: [1, 2, 3, 4, 5, 6, 7, "", 8],
+      timer: 0,
+      winner: false
+    };
+    this.intervalID = null;
+  }
+
+  componentDidMount() {
+    this.randomize();
+    this.startTimer();
+  }
+
+  componentDidUpdate(prevState, prevProps) {
+    console.log(this.state.nums);
+
+    if (
+      [...this.state.nums] === [1, 2, 3, 4, 5, 6, 7, 8, ""] ||
+      [...this.state.nums] === [3, 2, 1, 6, 5, 4, "", 8, 7]
+    ) {
+      this.setState({ winner: true });
+    }
+  }
+
+  componentWillUnmount() {
+    this.stopTimer();
+  }
 
   render() {
     return (
       <>
         <Globals />
         <Button onClick={this.randomize}>Randomize</Button>
+        {this.state.winner && <h2>Winner!!!!</h2>}
+        <Timer>Time: {this.state.timer} seconds</Timer>
         <Board className="App">
           {this.state.nums.map((num, i) => {
             return (
@@ -99,7 +129,20 @@ class App extends Component {
     );
   }
 
+  startTimer() {
+    if (!this.intervalID) {
+      this.intervalID = setInterval(() => {
+        this.setTime();
+      }, 1000);
+    }
+  }
+
+  stopTimer() {
+    clearInterval(this.timerId);
+  }
+
   randomize = () => {
+    this.setState({ timer: 0 });
     let newNums = [...this.state.nums];
     let randArr = [];
     let i = newNums.length;
@@ -116,6 +159,11 @@ class App extends Component {
   findRandomNum = newNums => {
     let num = Math.floor(Math.random() * newNums.length);
     return num;
+  };
+
+  setTime = () => {
+    let timer = this.state.timer + 1;
+    this.setState({ timer });
   };
 
   swapper = num => {
